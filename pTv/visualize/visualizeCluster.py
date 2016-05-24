@@ -2,7 +2,7 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from pandas.tools.plotting import andrews_curves, parallel_coordinates
+from pandas.tools.plotting import andrews_curves, parallel_coordinates, radviz
 import seaborn as sns
 
 #%% IRIS EXAMPLE load data
@@ -10,23 +10,38 @@ iris = pd.read_csv("https://raw.githubusercontent.com/pydata/pandas/master/panda
 #%% IRIS EXAMPLE draw cluster visualize
 iris_cluster_1 = andrews_curves(iris, "Name")
 iris_cluster_2 = parallel_coordinates(iris, "Name")
-iris_heatmap = sns.heatmap(iris.ix[:,0:4], yticklabels = iris["Name"].tolist())
+iris_heatmap = sns.heatmap(iris.ix[:,0:4], yticklabels = iris["Name"].tolist(),vmin = 0, vmax = 10)
 
 
 #%% CURRENT WORKING modify data
-out.drop(["StopMonth"], axis = 1, inplace = True)
-out["cluster"] = out["cluster"].astype(str)
+viz = out
+viz.drop(["StopMonth"], axis = 1, inplace = True)
+viz.drop(["Sum"], axis = 1, inplace = True)
+viz["Cluster"] = viz["Cluster"].astype(str)
+viz.to_csv(DIR + "cluster.csv")
+
+#%%
+viz = out
+plt.figure()
+parallel_coordinates(viz, "Churn")
+#sns.heatmap(viz.ix[:,0:24], yticklabels = out["Churn"].tolist())
+plt.savefig(DIR + "TF-hourly-parallel.png")
+
+#%% CURRENT WORKING visualize cluster heatmap
+sns.heatmap(viz.ix[:,0:7], yticklabels = out["Cluster"].tolist())
+plt.savefig(DIR + "cluster4-app-200-heatmap.png")
 
 #%% CURRENT WORKING visualize cluster 1
 plt.figure()
-andrews_curves(out, "cluster")
-plt.savefig(DIR + "cluster_visualize_1.png")
+andrews_curves(out, "Cluster")
+#plt.savefig(DIR + "cluster4-hourly-curves.png")
 
 #%% CURRENT WORKING visualize cluster 2
 plt.figure()
-parallel_coordinates(out, "cluster")
-plt.savefig(DIR + "cluster_visualize_2.png")
+parallel_coordinates(viz, "Cluster")
+plt.savefig(DIR + "cluster4-app-50-parallel.png")
 
-#%% CURRENT WORKING visualize cluster heatmap
-sns.heatmap(out.ix[:,0:24], yticklabels = out["cluster"].tolist(), vmin = 0, vmax = 150000)
-plt.savefig(DIR + "cluster_heat.png")
+#%%
+plt.figure()
+radviz(out, "Cluster")
+#plt.savefig(DIR + "cluster4-hourly-radviz.png")

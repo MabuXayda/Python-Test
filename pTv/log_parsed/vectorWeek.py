@@ -10,15 +10,17 @@ vectorWeek = pd.read_csv(DIR + "result/t2_vectorWeek.csv", index_col = 0)
 vectorWeek = vectorWeek.replace("null", "0", regex=True)
 vectorWeek = vectorWeek[vectorWeek.columns.values].astype(int)
 
-#%% CHECK DATA
-vectorWeek["Max"] = vectorWeek.idxmax(axis=1)
 
 #%% MERGER WITH HUY_BOX
 df = pd.merge(vectorWeek, huy[["StopMonth"]], how = "outer", left_index = True, right_index = True)
 df.fillna(0, inplace = True)
-df = df[df["StopMonth"] != 2]
+#df = df[df["StopMonth"] != 2]
 df["StopMonth"] = df["StopMonth"].astype(int).astype(str)
-print df["Max"].value_counts(ascending = True)
+
+
+#%% CHECK DATA
+vectorWeek["Max"] = vectorWeek.idxmax(axis=1)
+
 
 #%% CLUSTER DATA
 kmeans = KMeans(n_clusters = 8)
@@ -31,6 +33,7 @@ test1 = joined[joined.StopMonth == "3"]
 print joined["cluster"].value_counts()
 print test1["cluster"].value_counts()
 print test1["Max"].value_counts()
+
 
 #%% SAMPLE DATA
 #df_sam1 = df[df["StopMonth"] == "0"]

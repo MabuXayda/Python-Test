@@ -13,15 +13,17 @@ col_select = [41,42,52,55,15,512,57,51,18,50,40,45,54,12,16,53,13]
 col_select = map(str,col_select)
 dfLogId = vectorLogId[col_select]
 
-#%% CHECK DATA
-print dfLogId.sum(axis = 0)
-
 
 #%% MERGE WITH HUY_BOX
 df = pd.merge(dfLogId, huy[["StopMonth"]], how = "outer", left_index = True, right_index = True)
 df.fillna(0, inplace = True)
 df = df[df["StopMonth"] != 2]
 df ["StopMonth"] = df["StopMonth"].astype(int)
+
+
+#%% CHECK DATA
+print df.sum(axis = 0)
+
 
 #%% CLUSTER DATA
 kmeans = KMeans(n_clusters = 8)
@@ -33,6 +35,7 @@ joined.sort(["cluster"], inplace = True)
 test1 = joined[joined.StopMonth == 3]
 print joined["cluster"].value_counts()
 print test1["cluster"].value_counts()
+
 
 #%% SAMPLE DATA
 df_sam1 = df[df["StopMonth"] == 0].sample(n = 4000)
