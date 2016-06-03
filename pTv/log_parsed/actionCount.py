@@ -6,13 +6,21 @@ import pandas as pd
 from sklearn.cluster import KMeans
 
 #%% LOAD DATA
-vectorLogId = pd.read_csv(DIR + "result/t2_vectorLogId_count.csv", index_col = 0)
-vectorLogId = vectorLogId.replace("null", "0", regex=True)
-vectorLogId = vectorLogId[vectorLogId.columns.values].astype(int)
-col_select = [41,42,52,55,15,512,57,51,18,50,40,45,54,12,16,53,13]
-col_select = map(str,col_select)
-dfLogId = vectorLogId[col_select]
+raw = pd.read_csv(DIR + "result/countLogId.csv")
+raw = raw.replace("null", "0", regex=True)
+raw = raw[raw.columns.values].astype(int)
 
+#%% MAIN DATA
+col_error = [11,14]
+#col_select = [41,42,52,55,15,512,57,51,18,50,40,45,54,12,16,53,13]
+col = map(str,col_error)
+col = ["CustomerId"] + col
+
+df = raw[col]
+
+active = pd.merge(df, uActFT[["CustomerId","Churn"]], on = "CustomerId", how = "right")
+churn = pd.merge(df, uChu[["CustomerId","Churn"]], on = "CustomerId", how = "right")
+df = pd.concat([active,churn])
 
 #%% MERGE WITH HUY_BOX
 df = pd.merge(dfLogId, huy[["StopMonth"]], how = "outer", left_index = True, right_index = True)
@@ -22,8 +30,8 @@ df ["StopMonth"] = df["StopMonth"].astype(int)
 
 
 #%% CHECK DATA
-print df.sum(axis = 0)
-
+#test = raw.ix[:,1:].sum(axis = 0)
+test.to_csv(DIR + "sumLogId.csv")
 
 #%% CLUSTER DATA
 kmeans = KMeans(n_clusters = 8)
