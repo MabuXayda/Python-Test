@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 
-DIR = "/home/tunn/data/tv/"
+#DIR = "/home/tunn/data/tv/"
+DIR = "D:/Work/Data/"
 
 #%% THONG KE VA LOC USER ACTIVE THEO LUONG SU DUNG
 

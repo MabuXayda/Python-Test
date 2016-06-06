@@ -39,17 +39,20 @@ radviz(viz, "Cluster")
 #plt.savefig(DIR + "cluster4-hourly-radviz.png")
 
 #%% seaborn boxplot
-temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = col, var_name = "Hour", value_name = "Time")
-temp["Hour"] = temp["Hour"].astype(int)
+#temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = col, var_name = "Hour", value_name = "Time")
+#temp["Hour"] = temp["Hour"].astype(int)
+temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = col, var_name = "logId", value_name = "Time")
+temp["logId"] = temp["logId"].astype(int)
 plt.figure()
-bp = sns.boxplot(x = "Hour", y="Time", data = df, hue = "Churn", fliersize = 1)
-bp.set_ylim(bottom = -10000)
-#plt.savefig(DIR + "describe.png")
+#bp = sns.boxplot(x = "Hour", y="Time", data = temp, hue = "Churn", fliersize = 1)
+bp = sns.boxplot(x = "logId", y="Time", data = temp, hue = "Churn", fliersize = 1)
+bp.set_ylim(bottom = -1)
+plt.savefig(DIR + "visualize/col_pay_sns_boxplot.png")
 
 #%% pandas boxplot
 plt.figure()
-bp = df.groupby("Churn").boxplot(column = col, figsize = (20,5))
-#plt.savefig(DIR + "pandas_boxplot.png")
+bp = df.groupby("Churn").boxplot(column = col, figsize = (10,5))
+plt.savefig(DIR + "visualize/col_pay_pandas_boxplot.png")
 
 #%%
 color = dict(boxes='DarkGreen', whiskers='DarkOrange',

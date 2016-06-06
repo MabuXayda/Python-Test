@@ -2,7 +2,8 @@
 import pandas as pd
 from datetime import datetime
 
-DIR = "/home/tunn/data/tv/"
+#DIR = "/home/tunn/data/tv/"
+DIR = "D:/Work/Data/"
 f_t3 = datetime.strptime("31/03/2016", "%d/%m/%Y")
 
 #%% 
@@ -60,7 +61,7 @@ churn = churn[churn["DayActive"] >= 28]
 #active["Date"] = active["Date"].dt.date
 #churn["Date"] = churn["Date"].dt.date
 #churn["StopDate"] = churn["StopDate"].dt.date
-#active.to_csv(DIR + "userActive.csv", index = False)
-#churn.to_csv(DIR + "userChurn.csv", index = False)
+active.to_csv(DIR + "userActive.csv", index = False)
+churn.to_csv(DIR + "userChurn.csv", index = False)
 
 

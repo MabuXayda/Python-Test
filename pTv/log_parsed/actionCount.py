@@ -10,13 +10,20 @@ raw = pd.read_csv(DIR + "result/countLogId.csv")
 raw = raw.replace("null", "0", regex=True)
 raw = raw[raw.columns.values].astype(int)
 
-#%% MAIN DATA
-col_error = [11,14]
-#col_select = [41,42,52,55,15,512,57,51,18,50,40,45,54,12,16,53,13]
-col = map(str,col_error)
-col = ["CustomerId"] + col
+#%%
+df = raw 
+describe = df.drop("CustomerId", axis = 1).describe().astype(int)
+describe.to_csv(DIR + "describe.csv")
 
-df = raw[col]
+#%% MAIN DATA
+col_error = [11,14,20,30]
+col_IPTV = [40,41,43,45,46,47,48,49,410,411,412,413,414,42,44,451,461,415,416]
+col_pay = [411,132,143,166,151]
+#col_select = [41,42,52,55,15,512,57,51,18,50,40,45,54,12,16,53,13]
+col = map(str,col_pay)
+col_final = ["CustomerId"] + col
+
+df = raw[col_final]
 
 active = pd.merge(df, uActFT[["CustomerId","Churn"]], on = "CustomerId", how = "right")
 churn = pd.merge(df, uChu[["CustomerId","Churn"]], on = "CustomerId", how = "right")
