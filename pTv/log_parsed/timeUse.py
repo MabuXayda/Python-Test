@@ -1,38 +1,57 @@
 # -*- coding: utf-8 -*-
-
-DIR = "/home/tunn/data/tv/"
-
-import pandas as pd
-from sklearn.cluster import KMeans
-
+#%% LOAD SUPPORT DATA
+col_Hourly = []
+for i in range(24):
+    col_Hourly.append(str(i))   
 
 #%% LOAD DATA
-df = pd.read_csv(DIR + "result/RTP_vectorHourly.csv")
-df = df.replace("null", "0", regex=True)
-df = df[df.columns.values].astype(int)
+raw = pd.read_csv(DIR + "train/vectorHourly.csv")
+raw = raw.replace("null", "0", regex=True)
+raw = raw[raw.columns.values].astype(int)
 
 #dfApp = pd.DataFrame()
-#for i in vectorApp.columns.values:
-#    if(np.count_nonzero(vectorApp[i].unique()) > 1):
-#        dfApp[i] = vectorApp[i].astype(int)
+#for i in raw.columns.values:
+#    if(np.count_nonzero(raw[i].unique()) > 1):
+#        dfApp[i] = raw[i].astype(int)
 #        print i
 
+#%% BUILD FEATURE HOURLY
+
+raw["Sum"] = raw.ix[:,1:25].sum(axis = 1)
+raw["Time1"] = raw.ix[:,1:9].sum(axis = 1)
+raw["Time2"] = raw.ix[:,9:17].sum(axis = 1)
+raw["Time1"] = raw.ix[:,17:25].sum(axis = 1)
+
+
+#%% BUILD FEATURE APP
+
+
+
+
+#%%
+describe = raw.drop("CustomerId", axis = 1).describe().astype(int).transpose()
+dfApp["Sum"] = dfApp.drop("CustomerId", axis = 1).sum(axis = 1)
+
 #%% MAIN DF
-#df = pd.merge(dfHourly, huy[["StopMonth"]], how = "outer", left_index = True, right_index = True)
-#df.fillna(0, inplace = True)
-#df ["StopMonth"] = df["StopMonth"].astype(int)
+minUse = 4953
+maxUse = 1466940
+active = pd.merge(raw, uActFT[["CustomerId","DayActive","Churn"]], on = "CustomerId", how = "right")
+churn = pd.merge(raw, uChu[["CustomerId","DayActive","Churn"]], on = "CustomerId", how = "right")
 
 df = pd.concat([active,churn])
-col = []
-for i in range(24):
-    col.append(str(i))    
+    
+#%% SAMPLE DATA
+df_sam1 = df[(df["Churn"] == False)].sample(n = 5000)
+df_sam2 = df[df["Churn"] == True]
+train = pd.concat([df_sam2,df_sam1]).drop("CustomerId",axis = 1)
+
+train.to_csv(DIR + "testActive.csv", index = False)    
 
 #%% CLUSTER DATA
-
-kmeans = KMeans(n_clusters = 3)
-kmeans.fit(df.ix[:,0:24])
-result = pd.DataFrame(data=kmeans.labels_, columns = ["cluster"], index = df.index)
-joined = df.join(result, how = "inner")
+kmeans = KMeans(n_clusters = 5)
+kmeans.fit(df[col])
+result = pd.DataFrame(data=kmeans.labels_, columns = ["cluster"], index = df["CustomerId"])
+joined = df.join(result, how = "inner", on = "CustomerId")
 joined.sort(["cluster"], inplace = True)
 
 dfc = pd.DataFrame()
@@ -55,17 +74,4 @@ for i in range(len(dfc.Cluster.unique())):
     if(dfc["Cluster"].value_counts()[i] > 1):
         out = pd.concat([out, dfc[dfc["Cluster"] == i].sample(n = 200)])
 
-       
-#%% SAMPLE DATA
-#df_sam1 = df[(df["StopMonth"] == 0) & (df["Sum"] != 0)].sample(n = 10000)
-#df_sam2 = df[df["StopMonth"] != 0]
-df_sam1 = df[(df["Churn"] == False)].sample(n = 10000)
-df_sam2 = df[df["Churn"] == True]
-
-train = pd.concat([df_sam1,df_sam2])
-#train["Churn"] = out["StopMonth"].map({0 : "False", 3 : "True", 2 : "True"})
-#train.drop("StopMonth", axis = 1, inplace = True)
-#train.drop("Sum", axis = 1, inplace = True)
-
-train.to_csv(DIR + "train.csv", index = False)
 

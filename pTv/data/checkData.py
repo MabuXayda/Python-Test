@@ -2,29 +2,32 @@
 DIR = "/home/tunn/data/tv/"
 
 import pandas as pd
+from datetime import datetime
 import matplotlib.pyplot as plt
 
+#f_t2 = datetime.strptime("01/02/2016", "%d/%m/%Y")
+f_t3 = datetime.strptime("03/03/2016", "%d/%m/%Y")
 
-#%%
+#%% CHECK LOG ECLIPSE
 check = pd.read_csv(DIR + "check.csv", sep='|', header = None )
 check["Count"] = check[1].str.replace(" Valid/Total: ","").str.split("/").str.get(0)
 
 
-#%% COMPARE DATA
-df1 = pd.read_csv(DIR + "result/SMM_vectorHourly.csv", index_col = 0)
-df2 = pd.read_csv(DIR + "result/RTP_vectorHourly.csv", index_col = 0)
-df1 = df1.replace("null", "0", regex = True)
-df2 = df2.replace("null", "0", regex = True)
-df1 = df1[df1.columns.values].astype(int)
-df2 = df2[df2.columns.values].astype(int)
-df1["Sum1"] = df1.ix[:,0:24].sum(axis = 1)
-df2["Sum2"] = df2.ix[:,0:24].sum(axis = 1)
+#%% CHECK LOG
 
-compare = pd.merge(df1[["Sum1"]], df2[["Sum2"]], left_index = True, right_index = True, how = "outer" )
-compare = compare[(compare["Sum1"] > 0) & (compare["Sum2"] > 0)]
-compare["Compare"] = compare["Sum1"] > compare["Sum2"]
-compare["Percent"] = (compare["Sum2"] / compare["Sum1"]) * 100
-print compare["Compare"].value_counts()
+
+#check = pd.read_csv(DIR + "log.csv", header = None)
+#check = check[(check[5] != "null")]
+#check[5] = check[5].astype(float)
+#check[8] = pd.to_datetime(check[8])
+#check = check[check[5] > 0]
+#check = check[check[5] < (3 * 3600)]
+#check = check[check[8] > f_t3]
+#check[9] = check[8].dt.hour
+#check = check[check[9] < 6]
+check = check[check[9] == 3]
+print check[5].sum(axis = 0)
+
 
 #%%
 df = pd.read_csv(DIR + "VOD.csv", sep='\t', )
