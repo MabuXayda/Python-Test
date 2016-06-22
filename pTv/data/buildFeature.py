@@ -66,13 +66,13 @@ vector_logId = raw[["CustomerId", "LOGID_TIMESHIFT", "LOGID_PAY", "LOGID_SERVICE
 data = pd.merge(vector_hourly, vector_app, on = "CustomerId", how = "left") 
 data = pd.merge(data, vector_logId, on = "CustomerId", how = "inner")
                     
-#active = pd.merge(data, uAct[["CustomerId", "DayActive", "Churn"]], on = "CustomerId", how = "inner")
-active = pd.merge(data, uAct[["CustomerId", "DayActive", "Churn"]], on = "CustomerId", how = "inner").sample(n=5000)
+active = pd.merge(data, uAct[["CustomerId", "DayActive", "Churn"]], on = "CustomerId", how = "inner")
+#active = pd.merge(data, uAct[["CustomerId", "DayActive", "Churn"]], on = "CustomerId", how = "inner").sample(n=5000)
 churn = pd.merge(data, uChu[["CustomerId", "DayActive", "Churn"]], on = "CustomerId", how = "inner")             
 train = pd.concat([active, churn], ignore_index = True)
 
 #%%
-train.drop(["CustomerId", "Sum"], axis = 1, inplace = True)
+train.drop(["Sum"], axis = 1, inplace = True)
 train.to_csv(DIR + "train_sample.csv", index = False)
 
 #%% BUILD TEST DATA
