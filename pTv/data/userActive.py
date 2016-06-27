@@ -86,9 +86,6 @@ uAct = pd.read_csv(DIR + "support_data/userActive.csv" ,parse_dates = ["Date"],
                   infer_datetime_format = True, dayfirst=True)
 uAct["Churn"] = False 
 
-#uActFT = pd.read_csv(DIR + "support_data/userActiveFilter.csv")
-#uActFT = uActFT.merge(uAct[["CustomerId","DayActive","Churn"]], on = "CustomerId", how = "left")
-
 #%%
 uActNew = pd.read_csv(DIR + "support_data/userActive_t4.csv" ,parse_dates = ["Date"], 
                   infer_datetime_format = True, dayfirst=True)
