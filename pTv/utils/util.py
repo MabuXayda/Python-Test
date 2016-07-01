@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-#DIR = "/home/tunn/data/tv/"
-DIR = "D:/Work/Data/"
+DIR = "/home/tunn/data/tv/"
+#DIR = "D:/Work/Data/"
 
 import pandas as pd
 from sklearn.cluster import KMeans
