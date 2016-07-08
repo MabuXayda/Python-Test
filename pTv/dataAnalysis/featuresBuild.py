@@ -2,6 +2,7 @@
 #%% 
 import pandas as pd
 DIR = "/home/tunn/data/tv/"
+#%%
 feature = ['CustomerId', 'Time1', 'Time2', 'Time3', 
            'IPTV', 'VOD_TOTAL', 'SPORT', 'PAY_TOTAL', 'SERVICE', 
            'LOGID_TIMESHIFT', 'LOGID_PAY', 'LOGID_SERVICE', 'LOGID_UTIL_IPTV', 
@@ -24,9 +25,6 @@ uChuNew = pd.read_csv(DIR + "support_data/userChurn_t4.csv" ,parse_dates = ["Dat
                   infer_datetime_format = True, dayfirst=True)
 uChuNew["Churn"] = True
 
-
-
-
 #%%
 # ===========================================TRAIN===========================================
 #%% ------- BUILD FEATURE HOURLY
@@ -47,7 +45,7 @@ raw_chu = raw_chu[raw_chu["Sum"] < 1433528]
 
 raw = pd.concat([raw_act,raw_chu])
 vector_hourly = raw[["CustomerId", "Time1", "Time2", "Time3", "Sum"]]
- 
+
 # ------- BUILD FEATURE APP
 raw = pd.read_csv(DIR + "z_train/vectorApp.csv")
 raw = raw.replace("null", "0", regex=True)
@@ -101,7 +99,6 @@ train = pd.concat([active, churn], ignore_index = True)
 #train.to_csv(DIR + "train.csv", index = False, columns = feature)
 idFilter_train = raw[raw["CustomerId"].isin(train["CustomerId"]) == False]
 #idFilter_train.to_csv(DIR + "idFileter_train.csv", index = False)
-
 
 
 
@@ -180,6 +177,5 @@ test = pd.concat([active, churn], ignore_index = True)
 #test.to_csv(DIR + "test.csv", index = False, columns = feature)
 idFilter_test = raw[raw["CustomerId"].isin(test["CustomerId"]) == False]
 #idFilter_test.to_csv(DIR + "idFileter_test.csv", index = False)
-
 
 #%%

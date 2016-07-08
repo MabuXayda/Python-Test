@@ -61,11 +61,10 @@ idCount = idCount[idCount["42_2"] <= top_1]
 idCount = idCount[idCount["52_2"] <= top_2]   
 
 #%%  FILTER FINAL
-
 finalFilter = pd.merge(timeUse, idCount, on = "CustomerId", how = "inner")
 #finalFilter.to_csv(DIR + "support_data/userActiveFilter.csv", columns = ["CustomerId"], index = False)
 
-#%%
+#%% CHECK QUANTILE
 describe = pd.DataFrame()
 t = 1
 for des in (des1,des2,des3):
@@ -80,19 +79,6 @@ for des in (des1,des2,des3):
         print des.quantile(0.001 * i).astype(int)    
     print "/n"
     
-
-#%% LOAD USER ACTIVE
-uAct = pd.read_csv(DIR + "support_data/userActive.csv" ,parse_dates = ["Date"], 
-                  infer_datetime_format = True, dayfirst=True)
-uAct["Churn"] = False 
-
-#%%
-uActNew = pd.read_csv(DIR + "support_data/userActive_t4.csv" ,parse_dates = ["Date"], 
-                  infer_datetime_format = True, dayfirst=True)
-uActNew["Churn"] = False
-                  
-#%%                  
-
 
 
 

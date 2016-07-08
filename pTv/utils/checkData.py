@@ -2,11 +2,10 @@
 DIR = "/home/tunn/data/tv/"
 
 import pandas as pd
-from datetime import datetime
 import matplotlib.pyplot as plt
 
 #f_t2 = datetime.strptime("01/02/2016", "%d/%m/%Y")
-f_t3 = datetime.strptime("03/03/2016", "%d/%m/%Y")
+#f_t3 = datetime.strptime("03/03/2016", "%d/%m/%Y")
 
 #%% CHECK LOG ECLIPSE
 check = pd.read_csv(DIR + "check.csv", sep='|', header = None )
@@ -14,8 +13,6 @@ check["Count"] = check[1].str.replace(" Valid/Total: ","").str.split("/").str.ge
 
 
 #%% CHECK LOG
-
-
 #check = pd.read_csv(DIR + "log.csv", header = None)
 #check = check[(check[5] != "null")]
 #check[5] = check[5].astype(float)
@@ -29,13 +26,33 @@ check = check[check[9] == 3]
 print check[5].sum(axis = 0)
 
 
-#%%
-df = pd.read_csv(DIR + "VOD.csv", sep='\t', )
-df['view_rate'] = df['CountView']/df['Day']
-df['item_rate'] = df['CountItem'] / df['Day']
-des = df.describe().to_string()
-data  = df.sort(['view_rate', 'item_rate', 'Day'], ascending=[0,0,0])
-print(des)
+#%% CHECK PREDICTION
+test1 = pd.read_csv(DIR + "/train_test/t7_cluster/test_0.csv")
+test2 = pd.read_csv(DIR + "/train_test/t7_cluster/test_1.csv")
+test3 = pd.read_csv(DIR + "/train_test/t7_cluster/test_2.csv")
+test4 = pd.read_csv(DIR + "/train_test/t7_cluster/test_3.csv")
+result1 = pd.read_csv(DIR + "result_0.csv")
+result2 = pd.read_csv(DIR + "result_1.csv")
+result3 = pd.read_csv(DIR + "result_2.csv")
+result4 = pd.read_csv(DIR + "result_3.csv")
+
+test = pd.concat([test1,test2,test3,test4], ignore_index = True)
+result = pd.concat([result1,result2,result3,result4], ignore_index = True)
+result = result.drop("inst#", axis = 1).rename(columns = {"distribution": "dis-False", "Unnamed: 5": "dis-True"})
+
+result = pd.merge(test, result, left_index = True, right_index = True)
+result["actual"] = result["actual"].str[2:]
+result["predicted"] = result["predicted"].str[2:]
+
+out = result[result["predicted"] == "True"]
+out.to_csv(DIR + "/out_cluster.csv", index = False)
+
+out_f = result[(result["predicted"] == "False") & (result["actual"] == "True")]
+out_f.to_csv(DIR + "/out_cluster_false.csv", index = False)
+
+#out_test = test[test["CustomerId"].isin(out["CustomerId"])]
+#out_test = pd.merge(out_test, out, on= "CustomerId", how = "inner")
+#out_test.to_csv(DIR + "out_test.csv", index = False)
 
 #%%
 freqView = pd.value_counts(df['CountView'].values, sort=True)

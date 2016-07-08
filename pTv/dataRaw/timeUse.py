@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 #%% LOAD SUPPORT DATA
 col_Hourly = []
 for i in range(24):
     col_Hourly.append(str(i))   
     
 #%% LOAD DATA
-raw = pd.read_csv(DIR + "z_train/vectorHourly.csv")
-raw = raw.replace("null", "0", regex=True)
-raw = raw[raw.columns.values].astype(int)
+raw = pd.read_csv("/home/tunn/data/tv/z_total_train/vectorHourly.csv")
+#raw = raw.replace("null", "0", regex=True)
+#raw = raw[raw.columns.values].astype(int)
 
 #dfApp = pd.DataFrame()
 #for i in raw.columns.values:
@@ -28,6 +32,16 @@ raw_act = pd.merge(raw, uAct[["CustomerId", "Churn"]], on = "CustomerId", how = 
 raw_chu = pd.merge(raw, uChu[["CustomerId", "Churn"]], on = "CustomerId", how = "inner")
 
 df = pd.concat([raw_act,raw_chu])
+df["CustomerId"] = df["CustomerId"].astype(str)
+
+#%% VISUALIZE BOXPLOT
+col = df.columns.values.tolist()
+print type(col)
+plt.figure()
+temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = col[1:5], var_name = "Name", value_name = "Value")
+timeUse = sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
+plt.ylim(-1000, 300000)
+plt.savefig(DIR + "visualize/vectorWeek.png")
     
 #%% SAMPLE DATA
 df_sam1 = df[(df["Churn"] == False)].sample(n = 5000)

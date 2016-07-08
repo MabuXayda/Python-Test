@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pandas.tools.plotting import andrews_curves, parallel_coordinates, radviz
+import pandas as pd
+DIR = "/home/tunn/data/tv/"
+
 #%% IRIS EXAMPLE 
 iris = pd.read_csv("https://raw.githubusercontent.com/pydata/pandas/master/pandas/tests/data/iris.csv")
 iris_cluster_1 = andrews_curves(iris, "Name")
