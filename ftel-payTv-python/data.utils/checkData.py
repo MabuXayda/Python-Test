@@ -4,8 +4,23 @@ DIR = "/home/tunn/data/tv/"
 import pandas as pd
 import matplotlib.pyplot as plt
 
-#f_t2 = datetime.strptime("01/02/2016", "%d/%m/%Y")
-#f_t3 = datetime.strptime("03/03/2016", "%d/%m/%Y")
+#%% CHECK CUSTOMERID
+uAct = pd.read_csv(DIR + "support_data/old/userActive.csv" ,parse_dates = ["Date"], 
+                  infer_datetime_format = True, dayfirst=True)
+uChu = pd.read_csv(DIR + "support_data/old/userChurn.csv" ,parse_dates = ["Date", "StopDate"], 
+                  infer_datetime_format = True, dayfirst=True)          
+uAct_t2 = pd.read_csv(DIR + "support_data/userActive_t2.csv" ,parse_dates = ["Date"], 
+                  infer_datetime_format = True, dayfirst=True)
+uAct_t3 = pd.read_csv(DIR + "support_data/userActive_t3.csv" ,parse_dates = ["Date"], 
+                  infer_datetime_format = True, dayfirst=True)
+uChu_t2 = pd.read_csv(DIR + "support_data/userChurn_t2.csv" ,parse_dates = ["Date", "StopDate"], 
+                  infer_datetime_format = True, dayfirst=True)                            
+uChu_t3 = pd.read_csv(DIR + "support_data/userChurn_t3.csv" ,parse_dates = ["Date", "StopDate"], 
+                  infer_datetime_format = True, dayfirst=True)                            
+#%%
+#uChu_check = pd.concat([uChu_t2, uChu_t3], ignore_index = True)                  
+print uChu_check["CustomerId"].isin(uChu["CustomerId"]).count()
+
 
 #%% CHECK LOG ECLIPSE
 check = pd.read_csv(DIR + "check.csv", sep='|', header = None )
@@ -69,3 +84,4 @@ plt.annotate('third point', (freqView.index[16],freqView.ix[16]), xytext=(20,7),
 plt.annotate('forth point', (freqView.index[21],freqView.ix[21]), xytext=(25,5), textcoords='offset points', color='r', arrowprops=dict(arrowstyle='-|>'))
 plt.annotate(s, xy=(0,0.8), fontsize=9,xytext=(1.4, 0.1), textcoords='axes fraction',ha='right', va='bottom')
 plt.savefig(DIR + "freView.png", dpi=300,bbox_inches="tight")
+

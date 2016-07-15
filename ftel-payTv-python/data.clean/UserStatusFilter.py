@@ -3,6 +3,17 @@ import pandas as pd
 from datetime import datetime
 DIR = DIR = "/home/tunn/data/tv/"
 #%%
+chu_t2 = pd.read_csv("/home/tunn/data/tv/support_data/userChurn_t2.csv")
+chu_t3 = pd.read_csv("/home/tunn/data/tv/support_data/userChurn_t3.csv")
+chu_t4 = pd.read_csv("/home/tunn/data/tv/support_data/userChurn_t4.csv")
+churn = pd.concat([chu_t2,chu_t3], ignore_index = True)
+churn_check = pd.read_csv("/home/tunn/data/tv/support_data/old/userChurn.csv")
+churn_check_4 = pd.read_csv("/home/tunn/data/tv/support_data/old/userChurn_t4.csv")
+check = churn[churn["CustomerID"].isin(churn_check["CustomerId"])]
+check = chu_t4[chu_t4["CustomerID"].isin(churn_check_4["CustomerId"])]
+
+
+#%%
 f_t2 = datetime.strptime("29/02/2016", "%d/%m/%Y")
 f_t3 = datetime.strptime("31/03/2016", "%d/%m/%Y")
 f_t4 = datetime.strptime("30/04/2016", "%d/%m/%Y")
@@ -66,7 +77,8 @@ raw_chu_t6 = raw_chu_t6[raw_chu_t6["DayActive"] >= 28]
 active = [raw_act_t2,raw_act_t3,raw_act_t4,raw_act_t5,raw_act_t6]
 num = 2;
 for i in active:
-    i = i[["CustomerID", "Contract", "Date", "DayActive", "Churn"]]
+    i.rename(columns ={"CustomerID":"CustomerId"}, inplace = True)
+    i = i[["CustomerId", "Contract", "Date", "DayActive", "Churn"]]
     i.to_csv(DIR + "userActive_t" + str(num) + ".csv", index = False)
     num += 1  
 #%%
@@ -74,7 +86,8 @@ churn = [raw_chu_t2, raw_chu_t3, raw_chu_t4, raw_chu_t5, raw_chu_t6]
             
 num = 2;
 for i in churn:
-    i = i[["CustomerID", "Contract", "Date", "DayActive", "StopDate", "Churn"]]
+    i.rename(columns ={"CustomerID":"CustomerId"}, inplace = True)
+    i = i[["CustomerId", "Contract", "Date", "DayActive", "StopDate", "Churn"]]
     i.to_csv(DIR + "userChurn_t" + str(num) + ".csv", index = False)
     num += 1 
 
