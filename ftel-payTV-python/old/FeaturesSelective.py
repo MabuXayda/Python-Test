@@ -5,7 +5,7 @@ import seaborn as sns
 DIR = "/home/tunn/data/tv/"
 
 #%%
-raw = pd.read_csv(DIR + "/train_test/z_train.csv")
+raw = pd.read_csv(DIR + "z_train_nofilter.csv")
 print raw.dtypes
 
 #%% ------- MAIN DF
@@ -24,16 +24,26 @@ temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colTime[1:4], va
 timeUse = sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
 plt.ylim(-10000, 650000)
 plt.xlim(-1, 3)
-plt.savefig(DIR + "visualize/featureSelective/timeUse.png")
+plt.savefig(DIR + "visualize/featureSelectiveNoFilter/timeUse.png")
 
 #%% ------- TIME USE APP
 plt.figure()
 colApp = ['CustomerId','IPTV', 'VOD_TOTAL', 'SPORT', 'PAY_TOTAL', 'SERVICE', 'Churn']
 df = raw[colApp]
-temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colApp[3:5], var_name = "Name", value_name = "Value")
-timeUse = sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
+temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colApp[1:3], var_name = "Name", value_name = "Seconds")
+timeUse = sns.boxplot(x = "Name", y="Seconds", data = temp, hue = "Churn", fliersize = 1)
+plt.ylim(-1000, 600000)
+plt.savefig(DIR + "visualize/featureSelectiveNoFilter/vectorApp_1.png")
+#%%
+temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colApp[3:5], var_name = "Name", value_name = "Seconds")
+timeUse = sns.boxplot(x = "Name", y="Seconds", data = temp, hue = "Churn", fliersize = 1)
 plt.ylim(-10, 200)
-plt.savefig(DIR + "visualize/featureSelective/timeApp_2.png")
+plt.savefig(DIR + "visualize/featureSelectiveNoFilter/vectorApp_2.png")
+#%%
+temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colApp[5], var_name = "Name", value_name = "Seconds")
+timeUse = sns.boxplot(x = "Name", y="Seconds", data = temp, hue = "Churn", fliersize = 1)
+plt.ylim(-100, 20000)
+plt.savefig(DIR + "visualize/featureSelectiveNoFilter/vectorApp_3.png")
 
 #%% ------- LOGID COUNT
 plt.figure()
@@ -44,7 +54,7 @@ temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colLogId[1:7], v
 timeUse = sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
 plt.ylim(-5, 20)
 plt.xticks(rotation = 20)
-plt.savefig(DIR + "visualize/featureSelective/logId_1.png")
+plt.savefig(DIR + "visualize/featureSelectiveNoFilter/logId_1.png")
 
 #%% ------- REUSE TIME
 plt.figure()
@@ -54,7 +64,7 @@ temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colReuseTime[1:4
 timeUse = sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
 plt.ylim(-1, 30)
 plt.xlim(-1, 3)
-plt.savefig(DIR + "visualize/featureSelective/reuseTime.png")
+plt.savefig(DIR + "visualize/featureSelectiveNoFilter/reuseTime.png")
 
 #%% ------- DAY ACTIVE
 plt.figure()
@@ -65,5 +75,5 @@ timeUse = sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersi
 plt.ylim(-1, 850)
 #plt.xticks(rotation = 20)
 #plt.xlim(-1, 3)
-plt.savefig(DIR + "visualize/featureSelective/dayActive.png")
+plt.savefig(DIR + "visualize/featureSelectiveNoFilter/dayActive.png")
 
