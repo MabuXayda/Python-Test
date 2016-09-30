@@ -7,7 +7,7 @@ Created on Fri Jul 29 15:17:04 2016
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def visualzedfContractUsage(dfContractUsage, monthIndex):
+def visualizeContractUsage(dfContractUsage, monthIndex):
     dfContractUsage.plot.scatter(x = "TotalBox", y = True)
     plt.xlim(-3,70) 
     plt.ylim(-3,70)

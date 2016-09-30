@@ -5,7 +5,6 @@ Created on Tue Jul 26 16:56:03 2016
 @author: tunn
 """
 import pandas as pd
-from core import utils
 #%%
 def loadUserActive(userActivePath):
     raw = pd.read_csv(userActivePath ,parse_dates = ["Date"], 
@@ -21,8 +20,8 @@ def loadUserChurn(userChurnPath):
     raw["CustomerId"] = raw["CustomerId"].astype(str)
     return raw
     
-def loadUserVector(monthDir, fileVector):
-    raw = pd.read_csv(utils.DIR + "/" + monthDir + "/" + fileVector)
+def loadUserVector(vectorPath):
+    raw = pd.read_csv(vectorPath)
     raw["CustomerId"] = raw["CustomerId"].astype(str)
     return raw
     

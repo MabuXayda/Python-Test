@@ -27,6 +27,7 @@ FEATURES_APP_SELECTED = ["CustomerId", "IPTV", "VOD_TOTAL", "SPORT", "PAY_TOTAL"
 FEATURES_LOGID_COUNT_SELECTED = ["CustomerId", "LOGID_TIMESHIFT", "LOGID_PAY", "LOGID_SERVICE", 
                                  "LOGID_UTIL_IPTV", "LOGID_UTIL_VOD", "LOGID_UTIL_SPORT"]
 FEATURES_RETURN_USE_SELECTED = ["CustomerId", "ReuseCount", "ReuseAvg", "ReuseMax"]
+FEATURES_DAYS_SELECTED = ["CustomerId", "ReduceUse"]
            
            
 FILE_VECTOR_HOURLY = "vectorHourly.csv"

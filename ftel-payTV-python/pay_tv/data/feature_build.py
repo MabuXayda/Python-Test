@@ -10,17 +10,17 @@ from core import utils
 #%%
 def filterUsage(dfUsage, willFilterBottom, willFilterTop, bottomValue = utils.USAGE_BOTTOM):
     if(willFilterBottom):
-        dfUsage = dfUsage[dfUsage["Sum"] >= bottomValue]
+        dfUsage = dfUsage[dfUsage["Sum"] > bottomValue]
     if(willFilterTop):        
-        dfUsage = dfUsage[dfUsage["Sum"] <= utils.USAGE_TOP]
+        dfUsage = dfUsage[dfUsage["Sum"] < utils.USAGE_TOP]
     return dfUsage
     
 def filterLogIdCount(dfLogId, willFilterBottom, willFilterTop, bottomValue = utils.ID_42_BOTTOM):
     if(willFilterBottom):    
-        dfLogId = dfLogId[dfLogId["42"] >= utils.bottomValue]
+        dfLogId = dfLogId[dfLogId["42"] > utils.bottomValue]
     if(willFilterTop):
-        dfLogId = dfLogId[dfLogId["42"] <= utils.ID_42_TOP]
-        dfLogId = dfLogId[dfLogId["52"] <= utils.ID_52_TOP]
+        dfLogId = dfLogId[dfLogId["42"] < utils.ID_42_TOP]
+        dfLogId = dfLogId[dfLogId["52"] < utils.ID_52_TOP]
     return dfLogId
 
 def buildFeatureFromVectorHourly(dfHourly):
@@ -43,6 +43,15 @@ def buildFeatureFromLogIdCount(dfLogId):
     dfLogId["LOGID_UTIL_VOD"] = dfLogId[["58"]].sum(axis = 1)
     dfLogId["LOGID_UTIL_SPORT"] = dfLogId[["69"]].sum(axis = 1)
     return dfLogId
+    
+def buildFeatureFromVectorDays(dfDays):
+    col = dfDays.columns.values[1:29].tolist()
+    tmp = scaleHorizontal(dfDays, col)
+    val = 0
+    for i in reversed(range(27)):
+        val = val + (tmp[str(i)] - tmp[str(i + 1)])
+    dfDays["ReduceUse"] = val
+    return dfDays        
 
 def scaleHorizontal(df, arrCol):
     df["Sum"] = df[arrCol].sum(axis = 1)

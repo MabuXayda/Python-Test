@@ -57,9 +57,10 @@ tmp = vfTotal
 #    tmp[str(i)] = str(i) + ":" + tmp[str(i)]
     
 #%%
-col = vfTotal.columns.values[0:29].tolist()
-tmp.to_csv(utils.DIR + "/sofia.csv", sep = " ", index = False, header = False, columns = col)    
-tmp.to_csv(utils.DIR + "/sofia_cluster5_result.csv", sep = " ", index = False)    
+col = vfTotal.columns.values[1:].tolist()
+tmp.to_csv(utils.DIR + "/elki.csv", sep = " ", index = False, header = False, columns = col)    
+#tmp.to_csv(utils.DIR + "/sofia_cluster5_result.csv", sep = " ", index = False)    
+
 
 #%%
 tmp = vfTotal
@@ -74,18 +75,18 @@ for i in range (5):
     print tmp[tmp["cluster"] == i]["Churn"].value_counts()                        
 
 #%% AGNES
-#from sklearn.cluster import AgglomerativeClustering
-#
-#cluster_model = AgglomerativeClustering(n_clusters = 2, affinity = "cosine", linkage = "average", 
-#                                        memory = "/home/tunn/data/tv/cluster_cache")
-#cluster_model.fit(vfTotal.ix[:20000,1:29])
-#cluster = pd.DataFrame(data=cluster_model.labels_, columns = ["cluster"], index = vfTotal.ix[:20000,:]["CustomerId"]).reset_index()
-#
-#test = vfTotal[vfTotal["CustomerId"].isin(cluster["CustomerId"])]
-#test = test.merge(cluster, on = "CustomerId")
-#print test["cluster"].value_counts()
-#tmp = test[test["cluster"] == 1].drop(["Contract", "DayActive", "Sum", "cluster"], axis = 1)
-#print tmp["Churn"].value_counts()
+from sklearn.cluster import AgglomerativeClustering
+
+cluster_model = AgglomerativeClustering(n_clusters = 2, affinity = "cosine", linkage = "average", 
+                                        memory = "/home/tunn/data/tv/cluster_cache")
+cluster_model.fit(vfTotal.ix[:20000,1:29])
+cluster = pd.DataFrame(data=cluster_model.labels_, columns = ["cluster"], index = vfTotal.ix[:20000,:]["CustomerId"]).reset_index()
+
+test = vfTotal[vfTotal["CustomerId"].isin(cluster["CustomerId"])]
+test = test.merge(cluster, on = "CustomerId")
+print test["cluster"].value_counts()
+tmp = test[test["cluster"] == 1].drop(["Contract", "DayActive", "Sum", "cluster"], axis = 1)
+print tmp["Churn"].value_counts()
 
 #%% DBSCAN
 #from sklearn.cluster import DBSCAN

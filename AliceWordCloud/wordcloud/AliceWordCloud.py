@@ -16,7 +16,6 @@ def color_func(word, font_size, position, orientation, random_state=None, **kwar
 
 #%%
 text = open(d + "hippo.txt").read().upper()
-font = "/home/tunn/Documents/londrina/LondrinaSketche-Regular.otf"
 
 mask = np.array(Image.open(d + "hippo.jpg"))
 #mask_coloring = imread(d + "hippo_violet.jpg")
@@ -71,7 +70,7 @@ stopwords.add("time")
 stopwords.add("system")
 
 
-wc = WordCloud(background_color="black", max_words=2000, mask=mask, margin=7, font_path=font, 
+wc = WordCloud(background_color="black", max_words=2000, mask=mask, margin=7, font_path="/home/tunn/londrina/LondrinaSketche-Regular.otf", 
                stopwords=stopwords, max_font_size=350).generate(text)
 
 #plt.imshow(wc.recolor(color_func=color_func))
