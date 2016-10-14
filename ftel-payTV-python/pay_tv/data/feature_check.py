@@ -4,64 +4,82 @@ Created on Thu Jul 28 09:15:15 2016
 
 @author: tunn
 """
-
 import pandas as pd
-from pay_tv.core import utils
-import feature_build as fb
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-def printSomeMontlyChurnInfo(vfHourlyAct, vfHourlyChurn):
-    active = vfHourlyAct[["CustomerId", "Contract", "Sum", "Churn"]]
-    churn = vfHourlyChurn[["CustomerId", "Contract", "Sum", "Churn"]]
-    print "Total box churn: " + str(len(churn.axes[0]))
-    print "Total contract have churn: " +  str(len(churn["Contract"].unique()))
-    churn_some = churn[churn["Contract"].isin(active["Contract"])]["Contract"]
-    print "Contract churn some box: " + str(len(churn_some.unique()))
-    churn_full = churn[churn["Contract"].isin(active["Contract"]) == False]["Contract"]
-    print "Contract churn all box: " + str(len(churn_full.unique()))
+#DIR = "/home/tunn/data/tv/visualize/t6"
 
-def printSomeMontlyFilterInfo(vfHourlyAct):
-    active = vfHourlyAct[["CustomerId", "Contract", "Sum", "Churn"]]
-    dfFilter = active[active["CustomerId"].isin(fb.filterUsage(active)["CustomerId"]) == False]
-    print "Number of filter: " + str(len(dfFilter.axes[0])) 
-    dfFilterBot = active[active["CustomerId"].isin(fb.filterUsageBottomOnly(active)["CustomerId"]) == False]    
-    print "Number of filter bottom only: " + str(len(dfFilterBot.axes[0]))
-    dfFilter0 = active[active["Sum"] == 0][["CustomerId", "Contract", "Sum"]]
-    print "Number of filter 0: " + str(len(dfFilter0.axes[0]))
+def boxplotVectorDays(raw, outputDir):
+    plt.figure()
+    temp = pd.melt(raw, id_vars=["CustomerId","Churn"], value_vars = map(str,range(28)), var_name = "Day", value_name = "Value")
+    temp["Day"] = temp["Day"].astype(int)
+    sns.boxplot(x = "Day", y="Value", data = temp, hue = "Churn", fliersize = 1)
+    plt.legend(loc = 'upper right')
+    plt.ylim(-100, 50000)
+    #plt.xlim(-1, 3)
+    plt.savefig(outputDir + "/vectorDays.png", dpi = 300)
 
-def getRelatedBoxFilterBottom(vfHourlyAct, listContract, bottomValue):
-    active = vfHourlyAct[["CustomerId", "Contract", "Sum", "Churn"]]
-    tmp = active[active["Contract"].isin(listContract)].groupby("Contract")["Sum"].max().reset_index()   
-    print "Unique contract trong filter: " + str(len(tmp.axes[0]))
-    tmpUse = tmp[tmp["Sum"] >= bottomValue]
-    tmpNoUse = tmp[tmp["Sum"] < bottomValue]
-    print "Contract có sử dụng ở box khác: " + str(len(tmpUse.axes[0]))
-    print "Contract không hề sử dụng: " + str(len(tmpNoUse.axes[0]))
+def boxplotCheckFeature(raw, outputDir):
+    #%% ------- TIME USE
+    plt.figure()
+    colTime = ['CustomerId', 'Time1', 'Time2', 'Time3', 'Churn']
+    df = raw[colTime]
+    temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colTime[1:4], var_name = "Name", value_name = "Value")
+    sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
+    plt.ylim(-10000, 650000)
+    plt.xlim(-1, 3)
+    plt.savefig(outputDir + "/timeUse.png", dpi = 300)
     
-    dfCheckFilUse = active[active["Contract"].isin(tmpUse["Contract"])][["CustomerId", "Contract", "Sum"]]
-    print "Box related với contract có sử dụng ở box khác: " + str(len(dfCheckFilUse.axes[0]))
-    dfCheckFilNoUse = active[active["Contract"].isin(tmpNoUse["Contract"])][["CustomerId", "Contract", "Sum"]]
-    print "Box related với contract không hề sử dụng: " + str(len(dfCheckFilNoUse.axes[0]))
+    #%% ------- TIME USE APP
+    plt.figure()
+    colApp = ['CustomerId','IPTV', 'VOD_TOTAL', 'SPORT', 'PAY_TOTAL', 'SERVICE', 'Churn']
+    df = raw[colApp]
+    temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colApp[1:3], var_name = "Name", value_name = "Seconds")
+    sns.boxplot(x = "Name", y="Seconds", data = temp, hue = "Churn", fliersize = 1)
+    plt.ylim(-1000, 600000)
+    plt.savefig(outputDir + "/vectorApp_1.png", dpi = 300)
     
-    return dfCheckFilUse  
+    plt.figure()
+    temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colApp[3:5], var_name = "Name", value_name = "Seconds")
+    sns.boxplot(x = "Name", y="Seconds", data = temp, hue = "Churn", fliersize = 1)
+    plt.ylim(-10, 200)
+    plt.savefig(outputDir + "/vectorApp_2.png", dpi = 300)
     
-def getContractUsage(df):
-    df = df[["CustomerId", "Contract", "Sum", "Churn"]]
-    df["Use"] = df["Sum"] >= utils.USAGE_BOTTOM
+    plt.figure()    
+    temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colApp[5], var_name = "Name", value_name = "Seconds")
+    sns.boxplot(x = "Name", y="Seconds", data = temp, hue = "Churn", fliersize = 1)
+    plt.ylim(-100, 20000)
+    plt.savefig(outputDir + "/vectorApp_3.png", dpi = 300)
     
-    alpha = df.groupby(["Contract", "Churn"])["CustomerId"].count().reset_index().pivot("Contract","Churn")["CustomerId"].reset_index()
-    alpha.fillna(0 ,inplace = True)
-    alpha["TotalBox"] = alpha[False] + alpha[True]    
-    alpha.rename(columns = {False : "BoxNoChurn", True : "BoxChurn"}, inplace = True)
-    alpha = alpha.merge(pd.DataFrame({"SumBoxHour" : df.groupby("Contract")["Sum"].sum()/3600}).reset_index(), on = "Contract")
-    alpha = alpha.merge(pd.DataFrame({"MaxBoxHour" : df.groupby("Contract")["Sum"].max()/3600}).reset_index(), on = "Contract")
-    alpha["AvgBoxHour"] = alpha["SumBoxHour"] / alpha["TotalBox"]
+    #%% ------- LOGID COUNT
+    plt.figure()
+    colLogId = ['CustomerId','LOGID_TIMESHIFT', 'LOGID_PAY', 'LOGID_SERVICE', 'LOGID_UTIL_IPTV', 
+               'LOGID_UTIL_VOD', 'LOGID_UTIL_SPORT', 'Churn']
+    df = raw[colLogId]
+    temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colLogId[1:7], var_name = "Name", value_name = "Value")
+    sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
+    plt.ylim(-5, 20)
+    plt.xticks(rotation = 20)
+    plt.savefig(outputDir + "/logId_1.png", dpi = 300)
     
-    beta = df.groupby(["Contract", "Use"])["CustomerId"].count().reset_index().pivot("Contract","Use")["CustomerId"].reset_index()
-    beta.fillna(0 ,inplace = True)
-    beta.rename(columns = {False : "BoxNotUse", True : "BoxUse"}, inplace = True)
+    #%% ------- REUSE TIME
+    plt.figure()
+    colReuseTime = ['CustomerId', 'ReuseCount', 'ReuseAvg', 'ReuseMax', 'Churn']
+    df = raw[colReuseTime]
+    temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colReuseTime[1:4], var_name = "Name", value_name = "Value")
+    sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
+    plt.ylim(-1, 30)
+    plt.xlim(-1, 3)
+    plt.savefig(outputDir + "/reuseTime.png", dpi = 300)
     
-    tmp = pd.merge(alpha, beta[["Contract", "BoxNotUse", "BoxUse"]], on = "Contract")
-    tmp = tmp[["Contract", "BoxUse", "BoxNotUse", "BoxNoChurn", "BoxChurn", "TotalBox", "SumBoxHour", "AvgBoxHour", "MaxBoxHour"]]
-    return tmp
-    
-    
+    #%% ------- DAY ACTIVE
+    plt.figure()
+    colDayActive = ['CustomerId', 'DayActive', 'Churn']
+    df = raw[colDayActive]
+    temp = pd.melt(df, id_vars=["CustomerId","Churn"], value_vars = colDayActive[1], var_name = "Name", value_name = "Value")
+    sns.boxplot(x = "Name", y="Value", data = temp, hue = "Churn", fliersize = 1)
+    plt.ylim(-1, 850)
+    #plt.xticks(rotation = 20)
+    #plt.xlim(-1, 3)
+    plt.savefig(outputDir + "/dayActive.png", dpi = 300)

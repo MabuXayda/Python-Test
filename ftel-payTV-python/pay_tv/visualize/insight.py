@@ -5,7 +5,7 @@ Created on Fri Jul 29 15:17:04 2016
 @author: tunn
 """
 import matplotlib.pyplot as plt
-import seaborn as sns
+#import seaborn as sns
 
 def visualizeContractUsage(dfContractUsage, monthIndex):
     dfContractUsage.plot.scatter(x = "TotalBox", y = True)

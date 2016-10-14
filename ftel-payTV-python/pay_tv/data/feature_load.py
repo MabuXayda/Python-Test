@@ -35,3 +35,21 @@ def getLocation(dfTotal):
     dfTotal = dfTotal.merge(region, on = "FirstCode")
     dfTotal.rename(columns = {"SubParentDesc": "Region", "Description": "City"}, inplace = True)
     return dfTotal
+
+def loadUserTotal(path):
+    raw = pd.read_csv(path)
+    raw["CustomerId"] = raw["CustomerId"].astype(str)
+    raw["Date"] = pd.to_datetime(raw["Date"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["StopDate"] = pd.to_datetime(raw["StopDate"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["LifeToEnd"] = raw["LifeToEnd"].astype(int)
+    return raw
+    
+def loadUserTotalValidLifeTime(path):
+    raw = pd.read_csv(path)
+    raw["CustomerId"] = raw["CustomerId"].astype(str)
+    raw["Date"] = pd.to_datetime(raw["Date"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["StopDate"] = pd.to_datetime(raw["StopDate"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["LifeToEnd"] = raw["LifeToEnd"].astype(int)
+    return raw[raw["LifeToEnd"] >= 28]
+
+#%%

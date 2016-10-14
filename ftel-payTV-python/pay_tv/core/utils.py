@@ -28,14 +28,6 @@ FEATURES_LOGID_COUNT_SELECTED = ["CustomerId", "LOGID_TIMESHIFT", "LOGID_PAY", "
                                  "LOGID_UTIL_IPTV", "LOGID_UTIL_VOD", "LOGID_UTIL_SPORT"]
 FEATURES_RETURN_USE_SELECTED = ["CustomerId", "ReuseCount", "ReuseAvg", "ReuseMax"]
 FEATURES_DAYS_SELECTED = ["CustomerId", "ReduceUse"]
-           
-           
-FILE_VECTOR_HOURLY = "vectorHourly.csv"
-FILE_VECTOR_DAILY = "vectorDaily.csv"
-FILE_VECTOR_APP = "vectorApp.csv"
-FILE_LOGID_COUNT = "logIdCount.csv"
-FILE_RETURN_USE = "returnUse.csv"
-FILE_VECTOR_DAYS = "vectorDays.csv"
 
 def concatFilterDuplicate(df1, df2, colFilter):
     df = pd.concat([df1, df2], ignore_index = True)

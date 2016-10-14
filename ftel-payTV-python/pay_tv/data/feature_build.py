@@ -4,10 +4,26 @@ Created on Tue Jul 26 16:44:23 2016
 
 @author: tunn
 """
-import pandas as pd
+#import pandas as pd
 from core import utils
+import feature_load as fl
 
 #%%
+
+def buildFeatureAll(inputDir):
+    df = buildFeatureFromVectorHourly(fl.loadUserVector
+        (inputDir + "/vectorHourly.csv"))[utils.FEATURES_HOURLY_SELECTED]
+    df = df.merge(buildFeatureFromVectorApp(fl.loadUserVector
+        (inputDir + "/vectorApp.csv"))[utils.FEATURES_APP_SELECTED])
+    df = df.merge(buildFeatureFromLogIdCount(fl.loadUserVector
+        (inputDir + "/logIdCount.csv"))[utils.FEATURES_LOGID_COUNT_SELECTED])
+    df = df.merge(fl.loadUserVector(inputDir + "/reuseInfo.csv")
+        [utils.FEATURES_RETURN_USE_SELECTED])
+    return df        
+            
+    
+#%%    
+
 def filterUsage(dfUsage, willFilterBottom, willFilterTop, bottomValue = utils.USAGE_BOTTOM):
     if(willFilterBottom):
         dfUsage = dfUsage[dfUsage["Sum"] > bottomValue]
@@ -54,11 +70,11 @@ def buildFeatureFromVectorDays(dfDays):
     return dfDays        
 
 def scaleHorizontal(df, arrCol):
-    df["Sum"] = df[arrCol].sum(axis = 1)
+    df["SumTemp"] = df[arrCol].sum(axis = 1)
     for i in arrCol:
-        df[i] = df[i]/df["Sum"] * 100
+        df[i] = df[i]/df["SumTemp"] * 100
     df.fillna(value = 0, inplace = True)
-#    df.drop("Sum", inplace = True)
+    df.drop("SumTemp", inplace = True)
     return df
     
 def scaleVertical(df, arrCol):
@@ -67,13 +83,3 @@ def scaleVertical(df, arrCol):
     df.fillna(value = 0, inplace = True)
     return df
 
-def buildTotalData(dfUserActive, dfUserChurn, featureHourly, featureApp, 
-                   featureLogIdCount, featureReturnUse):
-    data = pd.merge(featureHourly, featureApp, on = "CustomerId", how = "left") 
-    data = pd.merge(data, featureLogIdCount, on = "CustomerId", how = "inner")
-    data = pd.merge(data, featureReturnUse, on = "CustomerId", how = "left")
-    active = pd.merge(data, dfUserActive[["CustomerId", "DayActive", "Churn"]], on = "CustomerId", how = "inner")
-    churn = pd.merge(data, dfUserChurn[["CustomerId", "DayActive", "Churn"]], on = "CustomerId", how = "inner")             
-    data = pd.concat([active, churn], ignore_index = True)
-    data.drop(["Sum"], axis = 1, inplace = True)
-    return data  
