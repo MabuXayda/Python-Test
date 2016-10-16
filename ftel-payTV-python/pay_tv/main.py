@@ -85,8 +85,59 @@ print df["Status"].value_counts()
 #check = contract2[contract2.isin(contract)]
 
 #%%
+user_t4 = fl.loadUserTotalValidLifeTime("D:/Work/Data/data_support/total_t4.csv")
+user_t5 = fl.loadUserTotalValidLifeTime("D:/Work/Data/data_support/total_t5.csv")
+user_t5 = user_t5[(user_t5["ChurnToEnd"] == True) & (user_t5["CustomerId"].isin(user_t4["CustomerId"]))]
+user_t6 = fl.loadUserTotalValidLifeTime("D:/Work/Data/data_support/total_t6.csv")
+user_t6 = user_t6[(user_t6["ChurnToEnd"] == True) & (user_t6["CustomerId"].isin(user_t4["CustomerId"]))]
+user_t4 = user_t4[(user_t4["CustomerId"].isin(user_t5["CustomerId"]) == False) 
+    & (user_t4["CustomerId"].isin(user_t6["CustomerId"]) == False)]
+user_t4 = pd.concat([user_t4, user_t5, user_t6], ignore_index = True)
+print user_t4["ChurnToEnd"].value_counts()
 
+feature_t4 = fb.buildFeatureAll("D:/Work/Data/data_feature/feature_t4")
+feature_t4 = pd.merge(feature_t4, user_t4[["CustomerId","LifeToEnd","ChurnToEnd"]], on = "CustomerId", how = "inner")
+fil_t4 = feature_t4[(feature_t4["Sum"] <= 3600) & (feature_t4["ChurnToEnd"] == False)]
+user_t3 = fl.loadUserTotalValidLifeTime("D:/Work/Data/data_support/total_t3.csv")
+feature_t3 = fb.buildFeatureAll("D:/Work/Data/data_feature/feature_t3")
+feature_t3 = pd.merge(feature_t3, user_t3[["CustomerId","LifeToEnd","ChurnToEnd"]], on = "CustomerId")
+fil_t3 = feature_t3[(feature_t3["Sum"] <= 3600) & (feature_t3["ChurnToEnd"] == False)] 
+fil_t4 = fil_t4[fil_t4["CustomerId"].isin(fil_t3["CustomerId"])]
+feature_t4 = feature_t4[feature_t4["CustomerId"].isin(fil_t4["CustomerId"]) == False]
+print feature_t4["ChurnToEnd"].value_counts()
 
+feature_t3 = feature_t3[feature_t3["ChurnToEnd"] == True]
+feature_t4 = pd.concat([feature_t4, feature_t3], ignore_index = True)
+print feature_t4["ChurnToEnd"].value_counts()
+
+feature_t4.to_csv("D:/Work/Data/data_feature/feature_t4/train.csv", index = False)
+#%%
+user_t7 = fl.loadUserTotalValidLifeTime("D:/Work/Data/data_support/total_t7.csv")
+user_t8 = fl.loadUserTotalValidLifeTime("D:/Work/Data/data_support/total_t8.csv")
+user_t8 = user_t8[(user_t8["ChurnToEnd"] == True) & (user_t8["CustomerId"].isin(user_t7["CustomerId"]))]
+user_t9 = fl.loadUserTotalValidLifeTime("D:/Work/Data/data_support/total_t9.csv")
+user_t9 = user_t9[(user_t9["ChurnToEnd"] == True) & (user_t9["CustomerId"].isin(user_t7["CustomerId"]))]
+user_t7 = user_t7[(user_t7["CustomerId"].isin(user_t8["CustomerId"]) == False) 
+    & (user_t7["CustomerId"].isin(user_t9["CustomerId"]) == False)]
+print user_t7["ChurnToEnd"].value_counts()
+user_t7 = pd.concat([user_t7, user_t8, user_t9], ignore_index = True)
+print user_t7["ChurnToEnd"].value_counts()
+
+feature_t7 = fb.buildFeatureAll("D:/Work/Data/data_feature/feature_t7")
+feature_t7 = pd.merge(feature_t7, user_t7[["CustomerId","LifeToEnd","ChurnToEnd"]], on = "CustomerId", how = "inner")
+print feature_t7["ChurnToEnd"].value_counts()
+fil_t7 = feature_t7[(feature_t7["Sum"] <= 3600) & (feature_t7["ChurnToEnd"] == False)]
+
+user_t6 = fl.loadUserTotalValidLifeTime("D:/Work/Data/data_support/total_t6.csv")
+feature_t6 = fb.buildFeatureAll("D:/Work/Data/data_feature/feature_t6")
+feature_t6 = pd.merge(feature_t6, user_t6[["CustomerId","LifeToEnd","ChurnToEnd"]], on = "CustomerId")
+fil_t6 = feature_t6[(feature_t6["Sum"] <= 3600) & (feature_t6["ChurnToEnd"] == False)] 
+fil_t7 = fil_t7[fil_t7["CustomerId"].isin(fil_t6["CustomerId"])]
+
+feature_t7 = feature_t7[feature_t7["CustomerId"].isin(fil_t7["CustomerId"]) == False]
+print feature_t7["ChurnToEnd"].value_counts()
+
+feature_t7.to_csv("D:/Work/Data/data_feature/test.csv", index = False)
 
 
 
