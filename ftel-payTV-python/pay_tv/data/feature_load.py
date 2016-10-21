@@ -6,19 +6,6 @@ Created on Tue Jul 26 16:56:03 2016
 """
 import pandas as pd
 #%%
-def loadUserActive(userActivePath):
-    raw = pd.read_csv(userActivePath ,parse_dates = ["Date"], 
-                  infer_datetime_format = True, dayfirst=True)
-    raw["Churn"] = False
-    raw["CustomerId"] = raw["CustomerId"].astype(str)
-    return raw
-
-def loadUserChurn(userChurnPath):
-    raw = pd.read_csv(userChurnPath ,parse_dates = ["Date", "StopDate"], 
-                  infer_datetime_format = True, dayfirst=True)
-    raw["Churn"] = True
-    raw["CustomerId"] = raw["CustomerId"].astype(str)
-    return raw
     
 def loadUserVector(vectorPath):
     raw = pd.read_csv(vectorPath)
@@ -36,7 +23,7 @@ def getLocation(dfTotal):
     dfTotal.rename(columns = {"SubParentDesc": "Region", "Description": "City"}, inplace = True)
     return dfTotal
 
-def loadUserTotal(path):
+def loadUserTotalFull(path):
     raw = pd.read_csv(path)
     raw["CustomerId"] = raw["CustomerId"].astype(str)
     raw["Date"] = pd.to_datetime(raw["Date"], format = "%Y-%m-%d %H:%M:%S.%f")
@@ -44,12 +31,45 @@ def loadUserTotal(path):
     raw["LifeToEnd"] = raw["LifeToEnd"].astype(int)
     return raw
     
-def loadUserTotalValidLifeTime(path):
+def loadUserTotal(path):
     raw = pd.read_csv(path)
     raw["CustomerId"] = raw["CustomerId"].astype(str)
     raw["Date"] = pd.to_datetime(raw["Date"], format = "%Y-%m-%d %H:%M:%S.%f")
     raw["StopDate"] = pd.to_datetime(raw["StopDate"], format = "%Y-%m-%d %H:%M:%S.%f")
     raw["LifeToEnd"] = raw["LifeToEnd"].astype(int)
     return raw[raw["LifeToEnd"] >= 28]
+    
+def loadUserActiveFull(path):
+    raw = pd.read_csv(path)
+    raw["CustomerId"] = raw["CustomerId"].astype(str)
+    raw["Date"] = pd.to_datetime(raw["Date"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["StopDate"] = pd.to_datetime(raw["StopDate"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["LifeToEnd"] = raw["LifeToEnd"].astype(int)
+    return raw[raw["ChurnToEnd"] == False]
+    
+def loadUserActive(path):
+    raw = pd.read_csv(path)
+    raw["CustomerId"] = raw["CustomerId"].astype(str)
+    raw["Date"] = pd.to_datetime(raw["Date"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["StopDate"] = pd.to_datetime(raw["StopDate"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["LifeToEnd"] = raw["LifeToEnd"].astype(int)
+    return raw[(raw["LifeToEnd"] >= 28) & (raw["ChurnToEnd"] == False)]
+
+def loadUserChurnFull(path):
+    raw = pd.read_csv(path)
+    raw["CustomerId"] = raw["CustomerId"].astype(str)
+    raw["Date"] = pd.to_datetime(raw["Date"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["StopDate"] = pd.to_datetime(raw["StopDate"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["LifeToEnd"] = raw["LifeToEnd"].astype(int)
+    return raw[raw["ChurnToEnd"] == True]
+    
+def loadUserChurn(path):
+    raw = pd.read_csv(path)
+    raw["CustomerId"] = raw["CustomerId"].astype(str)
+    raw["Date"] = pd.to_datetime(raw["Date"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["StopDate"] = pd.to_datetime(raw["StopDate"], format = "%Y-%m-%d %H:%M:%S.%f")
+    raw["LifeToEnd"] = raw["LifeToEnd"].astype(int)
+    return raw[(raw["LifeToEnd"] >= 28) & (raw["ChurnToEnd"] == True)]
+    
 
 #%%
