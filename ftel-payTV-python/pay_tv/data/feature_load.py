@@ -12,9 +12,6 @@ def loadUserVector(vectorPath):
     raw["CustomerId"] = raw["CustomerId"].astype(str)
     return raw
     
-def getUserInList(dfTotal, colIndex, listIndex):
-    return dfTotal[dfTotal[colIndex].isin(listIndex)]
-
 def getLocation(dfTotal):
     dfTotal["Contract"] = dfTotal["Contract"].str.upper()
     dfTotal["FirstCode"] = dfTotal["Contract"].str[0:2]
