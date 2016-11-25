@@ -5,91 +5,24 @@ from pay_tv.core import utils
 from pay_tv.data import feature_build as fb
 from pay_tv.data import feature_check as fc
 from pay_tv.data import feature_load as fl
-from pay_tv.data import feature_filter as ff
 import numpy as np
 from datetime import datetime
-
-CALL_LOG_SELECTED = ["CustomerId", "cnt_khieu_nai", "cnt_bao_tri", "cnt_ky_thuat", "cnt_hoi_dap"]
-DIFF_WEEK_SELECTED = ["CustomerId", "percent_w12", "percent_w34", "diff_rate"]
-PROMOTION_SELECTED = ["CustomerId", "PromotionCount", "HavePromotion"]
 # import seaborn as sns
 # import matplotlib.pyplot as plt
 
-def loadChurnAndChurnNextNMonthFeature(month, n):
-    churn = pd.concat([fl.loadUserChurn("/home/tunn/data/tv/data_support/total_t" + str(month) + ".csv"),
-                      ff.activeChurnNextNMonth(month, n)], ignore_index=True)
-    churn = pd.merge(fb.buildFeatureAll("/home/tunn/data/tv/data_feature/feature_t" + str(month)),
-                    churn[["CustomerId", "LifeToEnd", "ChurnToEnd"]],
-                    on="CustomerId", how="inner")
-    call = loadCallLog(month)
-    churn = pd.merge(call, churn, on = "CustomerId", how = "right") 
-    weekDiff = loadWeekDiff(month)
-    churn = pd.merge(weekDiff, churn, on = "CustomerId", how = "right")
-    km = loadPromotion(month)    
-    churn = pd.merge(km, churn, on = "CustomerId", how = "right")
-    return churn
-    
-def loadActiveNotChurnNextNMonthFeature(month, n):
-    active = pd.merge(fb.buildFeatureAll("/home/tunn/data/tv/data_feature/feature_t" + str(month)),
-                    fl.loadUserActive("/home/tunn/data/tv/data_support/total_t" + str(month) + ".csv")
-                    [["CustomerId", "LifeToEnd", "ChurnToEnd"]], on="CustomerId", how="inner")
-    churn = ff.activeChurnNextNMonth(month, n)                    
-    active = active[active["CustomerId"].isin(churn["CustomerId"]) == False]
-    call = loadCallLog(month)
-    active = pd.merge(call, active, on = "CustomerId", how = "right")
-    weekDiff = loadWeekDiff(month)
-    active = pd.merge(weekDiff, active, on = "CustomerId", how = "right")
-    km = loadPromotion(month)
-    active = pd.merge(km, active, on = "CustomerId", how = "right")
-    return active
-    
-def loadCallLog(month):
-    df = pd.read_csv("/home/tunn/data/tv/data_support/call_log/m"+str(month)+".csv")
-    df["CustomerId"] = df["CustomerId"].astype(str)    
-    return df[CALL_LOG_SELECTED]   
-    
-def loadWeekDiff(month):
-    df = pd.read_csv("/home/tunn/data/tv/data_support/f_vector_days/days"+str(month)+".csv")                  
-    df.rename(columns = {"%_w12" : "percent_w12", "%_w34" : "percent_w34" , "rate_weekly" : "diff_rate"}, inplace = True)                  
-    df["diff_rate"].fillna(0 , inplace = True)
-    df["CustomerId"] = df["CustomerId"].astype(str)
-    return df[DIFF_WEEK_SELECTED]        
-    
-def loadPromotion(month):
-    km = pd.read_csv("/home/tunn/data/tv/data_support/khuyen_mai/km_t"+str(month)+".csv")
-    km["CustomerId"] = km["CustomerId"].astype(str)
-    km = km.rename(columns = {"soluong_km" : "PromotionCount"})
-    km["HavePromotion"] = km["PromotionCount"] > 0    
-    return km[PROMOTION_SELECTED]
-    
-def filterDangKyLai(df):
-    fil = pd.read_csv("/home/tunn/data/tv/data_support/rm_dkylai.csv")
-    fil["CustomerId"] = fil["CustomerId"].astype(str)
-    df = df[df["CustomerId"].isin(fil["CustomerId"]) == False]
-    return df
-
-def filterCantUse(df, month):
-    fil = pd.read_csv("/home/tunn/data/tv/data_support/rm_contract_t" + str(month) + ".csv")
-#    fil = fil[fil["TBDV"] == True]    
-    user = pd.read_csv("/home/tunn/data/tv/data_support/total_t" + str(month) + ".csv")
-    user = user[user["Contract"].isin(fil["Contract"])]
-    user["CustomerId"] = user["CustomerId"].astype(str)
-    df = df[df["CustomerId"].isin(user["CustomerId"]) == False]
-    return df
-    
-def loadIsc(path):
-    isc = pd.read_csv(path)
-    isc["CustomerId"] = isc["CustomerId"].astype(str)
-    idf = "%Y-%m-%d %H:%M:%S.%f" # ISC DATE FORMAT
-    isc["Date"] = pd.to_datetime(isc["Date"], format = idf)
-    isc["ActiveDate"] = pd.to_datetime(isc["ActiveDate"], format = idf)
-    isc["SuspendDate"] = pd.to_datetime(isc["SuspendDate"], format = idf)
-    isc["LastUpdate"] = pd.to_datetime(isc["LastUpdate"], format = idf)
-    isc["PromotionID"].fillna(0, inplace = True)
-    isc["PromotionID"] = isc["PromotionID"].astype(int)
-    isc["PromotionID"].replace(-1, 0, inplace = True)
-    isc["BoxType"] = isc["BoxType"].astype(int)
-    return isc
+#def loadIsc(path):
+#    isc = pd.read_csv(path)
+#    isc["CustomerId"] = isc["CustomerId"].astype(str)
+#    idf = "%Y-%m-%d %H:%M:%S.%f" # ISC DATE FORMAT
+#    isc["Date"] = pd.to_datetime(isc["Date"], format = idf)
+#    isc["ActiveDate"] = pd.to_datetime(isc["ActiveDate"], format = idf)
+#    isc["SuspendDate"] = pd.to_datetime(isc["SuspendDate"], format = idf)
+#    isc["LastUpdate"] = pd.to_datetime(isc["LastUpdate"], format = idf)
+#    isc["PromotionID"].fillna(0, inplace = True)
+#    isc["PromotionID"] = isc["PromotionID"].astype(int)
+#    isc["PromotionID"].replace(-1, 0, inplace = True)
+#    isc["BoxType"] = isc["BoxType"].astype(int)
+#    return isc
     
 def loadStatusChange(path):
     name = ["id", "Contract", "CustomerId", "CreateDate", "StartDate", "ChangeDate", "Reason", "StatusChange"]
@@ -99,6 +32,43 @@ def loadStatusChange(path):
     status["ChangeDate"] = pd.to_datetime(status["ChangeDate"], format="%d/%m/%Y %H:%M:%S.%f") 
     status = status.sort("ChangeDate")
     return status
+    
+def loadPay():
+    pay = pd.read_csv("/home/tunn/data/tv/data_raw/PAYMENT/payment7.csv", 
+                      names = ["Contract", "MAC", "Age", "PaymentMethod"], sep = "\t")
+    pay["Contract"] = pay["Contract"].str.upper()   
+    pay["PaymentMethod"] = pay["PaymentMethod"].str[1:]
+    return pay[["Contract", "PaymentMethod"]]
+    
+def loadIsc():    
+    first = pd.DataFrame()
+    for i in ["bt1", "bt2", "bt3", "NVLDTT", "CTBDV", "huy"]:
+        tmp = pd.read_csv("/home/tunn/data/tv/data_raw/ISC_CONTRACT/" + i + ".csv", index_col = 0, sep = "\t")
+        first = pd.concat([first, tmp], ignore_index = True)
+    first.drop("Unnamed: 9", axis = 1, inplace = True)    
+    first = first[first["Contract"].isnull() == False]
+    first["StatusID"] = first["StatusID"].astype(int)
+    first["Contract"] = first["Contract"].str.upper()
+    first["Date"] = pd.to_datetime(first["Date"], format = "%d/%m/%Y %H:%M:%S.%f")
+    first["StopDate"] = pd.to_datetime(first["StopDate"], format = "%d/%m/%Y %H:%M:%S.%f")
+    return first[["Contract", "StatusID", "Date", "StopDate", "Reason"]]
+    
+    
+def loadTotalPayTV():
+    total = pd.read_csv("/home/tunn/data/tv/data_support/totalUser_3110.csv")
+    total["CustomerId"] = total["CustomerId"].astype(str)
+#    total["Date"] = pd.to_datetime(total["Date"], format = "%Y-%m-%d %H:%M:%S")
+#    total["StopDate"] = pd.to_datetime(total["StopDate"], format = "%Y-%m-%d %H:%M:%S")
+#    total = total[total["StatusID"] == 1]
+    return total
+def loadPop():
+    pop = pd.concat([pd.read_csv("/home/tunn/data/tv/data_support/addon_pop.csv"), 
+                 pd.read_csv("/home/tunn/data/tv/data_raw/POP/pop_tapdiem_total.csv")], ignore_index = False)
+    pop["PointSet"] = pop["PointSet"].str.upper()
+    pop["Pop"] = pop["Pop"].str.upper()
+    pop.drop_duplicates("Contract", inplace = True)
+    return pop        
+
     
 # %% THONG KE SO LUONG USER ACTIVE/CHURN THEO MOI THANG VOI CAC MUC SU DUNG 0, 1H, 2H
 x = "/home/tunn/data/tv/data_support/total_t9.csv"
@@ -144,200 +114,6 @@ for i in range(3, 10):
     raw = raw.rename(columns={"LifeToEnd":"DayActive", "ChurnToEnd":"Churn"})
     
     fc.boxplotVectorDays(raw, z)
-
-# %% BUILD TRAIN DATA
-churn_t3 = loadChurnAndChurnNextNMonthFeature(3, 3)
-churn_t4 = loadChurnAndChurnNextNMonthFeature(4, 2)
-churn_t5 = loadChurnAndChurnNextNMonthFeature(5, 1)
-
-active_t3 = loadActiveNotChurnNextNMonthFeature(3, 1)
-active_t4 = loadActiveNotChurnNextNMonthFeature(4, 1)
-active_t5 = loadActiveNotChurnNextNMonthFeature(5, 1)
-
-fil_t3 = active_t3[active_t3["Sum"] <= 3600]
-fil_t4 = active_t4[active_t4["Sum"] <= 3600]
-fil_t5 = active_t5[active_t5["Sum"] <= 3600]
-                    
-filA = fil_t5.merge(fil_t4, on = "CustomerId", how = "inner").merge(fil_t3, 
-    on = "CustomerId", how = "inner")[["CustomerId"]]
-
-active_t5 = active_t5[active_t5["CustomerId"].isin(fil_t5["CustomerId"]) == False]
-
-train = pd.concat([active_t5, churn_t3, churn_t4, churn_t5], ignore_index = True)    
-print train["ChurnToEnd"].value_counts()          
-
-train.fillna(0, inplace = True)
-location = pd.read_csv("/home/tunn/data/tv/data_support/totalUser_3009.csv")
-location["CustomerId"] = location["CustomerId"].astype(str)
-train = pd.merge(location[["CustomerId", "LocGroup"]], train, on = "CustomerId", how = "inner")
-
-train = train[train["Sum"] > 0]
-
-train.to_csv("/home/tunn/data/tv/data_model/v3/train1.f5.csv", index = False)
-
-#%% BUILD TRAIN AGAIN
-#churn_t3 = loadChurnAndChurnNextNMonthFeature(3, 4)
-churn_t4 = loadChurnAndChurnNextNMonthFeature(4, 3)
-churn_t5 = loadChurnAndChurnNextNMonthFeature(5, 2)
-churn_t6 = loadChurnAndChurnNextNMonthFeature(6, 1)
-
-active_t6 = loadActiveNotChurnNextNMonthFeature(6, 1)
-
-fil_t6 = active_t6[active_t6["Sum"] <= 3600]
-
-active_t6 = active_t6[active_t6["CustomerId"].isin(fil_t6["CustomerId"]) == False]
-
-train = pd.concat([active_t6, churn_t4, churn_t5, churn_t6], ignore_index = True)    
-
-print train["ChurnToEnd"].value_counts()          
-
-train.fillna(0, inplace = True)
-location = pd.read_csv("/home/tunn/data/tv/data_support/totalUser_3009.csv")
-location["CustomerId"] = location["CustomerId"].astype(str)
-train = pd.merge(location[["CustomerId", "LocGroup"]], train, on = "CustomerId", how = "inner")
-
-train = train[train["Sum"] > 0]
-
-train.to_csv("/home/tunn/data/tv/data_model/v3/train4.f5.csv", index = False)
-                    
-
-# %% BUILD TEST DATA
-active_t6 = fl.loadUserActive("/home/tunn/data/tv/data_support/total_t6.csv")   
-
-churn_t7 = fl.loadUserChurn("/home/tunn/data/tv/data_support/total_t7.csv")
-churn_t7 = active_t6[active_t6["CustomerId"].isin(churn_t7["CustomerId"])]
-churn_t7["ChurnToEnd"] = True
-churn_t8 = fl.loadUserChurn("/home/tunn/data/tv/data_support/total_t8.csv")
-churn_t8 = active_t6[active_t6["CustomerId"].isin(churn_t8["CustomerId"])]
-churn_t8["ChurnToEnd"] = True
-churn_t9 = fl.loadUserChurn("/home/tunn/data/tv/data_support/total_t9.csv")
-churn_t9 = active_t6[active_t6["CustomerId"].isin(churn_t9["CustomerId"])]
-churn_t9["ChurnToEnd"] = True
-
-churn = pd.concat([churn_t7, churn_t8, churn_t9], ignore_index=True)
-active_t6 = active_t6[active_t6["CustomerId"].isin(churn["CustomerId"]) == False]
-
-test = pd.concat([active_t6, churn], ignore_index=True)
-test = pd.merge(fb.buildFeatureAll("/home/tunn/data/tv/data_feature/feature_t6"),
-                  test[["CustomerId", "LifeToEnd", "ChurnToEnd"]], on="CustomerId", how="inner")
-print test["ChurnToEnd"].value_counts()        
-
-call_t6 = loadCallLog(6)
-test = pd.merge(call_t6, test, on = "CustomerId", how = "right")
-weekDiff_t6 = loadWeekDiff(6)
-test = pd.merge(weekDiff_t6, test, on = "CustomerId", how = "right")
-km = loadPromotion(6)
-test = pd.merge(km, test, on = "CustomerId", how = "right")
-test.fillna(0, inplace = True)
-
-location = pd.read_csv("/home/tunn/data/tv/data_support/totalUser_3009.csv")
-location["CustomerId"] = location["CustomerId"].astype(str)
-test = pd.merge(location[["CustomerId", "LocGroup"]], test, on = "CustomerId", how = "inner")
-
-test = filterDangKyLai(test)
-test = filterCantUse(test, 6)
-        
-test.to_csv("/home/tunn/data/tv/data_model/v3/test3.f5.csv", index=False)
-
-#%% TEST AGAIN
-active_t7 = fl.loadUserActive("/home/tunn/data/tv/data_support/total_t7.csv")   
-
-churn_t8 = fl.loadUserChurn("/home/tunn/data/tv/data_support/total_t8.csv")
-churn_t8 = active_t7[active_t7["CustomerId"].isin(churn_t8["CustomerId"])]
-churn_t8["ChurnToEnd"] = True
-churn_t9 = fl.loadUserChurn("/home/tunn/data/tv/data_support/total_t9.csv")
-churn_t9 = active_t7[active_t7["CustomerId"].isin(churn_t9["CustomerId"])]
-churn_t9["ChurnToEnd"] = True
-churn_t10 = fl.loadUserChurn("/home/tunn/data/tv/data_support/total_t10.csv")
-#churn_t10["CustomerId"] = churn_t10["CustomerId"].astype(str)
-churn_t10 = active_t7[active_t7["CustomerId"].isin(churn_t10["CustomerId"])]
-churn_t10["ChurnToEnd"] = True
-
-churn = pd.concat([churn_t8, churn_t9, churn_t10], ignore_index=True)
-active_t7 = active_t7[active_t7["CustomerId"].isin(churn["CustomerId"]) == False]
-
-test = pd.concat([active_t7, churn], ignore_index=True)
-test = pd.merge(fb.buildFeatureAll("/home/tunn/data/tv/data_feature/feature_t7"),
-                  test[["CustomerId", "LifeToEnd", "ChurnToEnd"]], on="CustomerId", how="inner")
-print test["ChurnToEnd"].value_counts()
-
-call_t7 = loadCallLog(7)
-test = pd.merge(call_t7, test, on = "CustomerId", how = "right")
-weekDiff_t7 = loadWeekDiff(7)
-test = pd.merge(weekDiff_t7, test, on = "CustomerId", how = "right")
-km = loadPromotion(7)
-test = pd.merge(km, test, on = "CustomerId", how = "right")
-test.fillna(0, inplace = True)
-
-location = pd.read_csv("/home/tunn/data/tv/data_support/totalUser_3009.csv")
-location["CustomerId"] = location["CustomerId"].astype(str)
-test = pd.merge(location[["CustomerId", "LocGroup"]], test, on = "CustomerId", how = "inner")
-
-test = filterDangKyLai(test)
-test = filterCantUse(test, 7)
-
-test = test[test["Sum"] > 0]
-
-test.to_csv("/home/tunn/data/tv/data_model/v3/test7.f5.csv", index=False)
-
-# %% CHECK RESULT DATA
-status = fl.loadUserActive("/home/tunn/data/tv/data_support/total_t6.csv").ix[:,:5]
-data = pd.read_csv("/home/tunn/data/tv/data_model/v3/test6.f5.csv")
-data["CustomerId"] = data["CustomerId"].astype(str)
-result = pd.read_csv("/home/tunn/data/tv/data_model/v3/dis_output126.csv")
-result["predicted"] = result["predicted"].str.split(":").str.get(1) == "True"
-#print result["error"].value_counts()
-
-join = pd.merge(data, result[["predicted", "prediction"]], left_index = True, right_index = True).merge(
-    status, on = "CustomerId", how = "inner")
-FEATURES_LOGID_COUNT = ["LOGID_TIMESHIFT", "LOGID_PAY", "LOGID_SERVICE", "LOGID_UTIL_IPTV", 
-                        "LOGID_UTIL_VOD", "LOGID_UTIL_SPORT"]
-join.drop(FEATURES_LOGID_COUNT, axis=1, inplace=True)
-#---------------
-joinF = join[join["predicted"] == False]
-joinF.sort("prediction", inplace = True, ascending = False)
-print joinF["ChurnToEnd"].value_counts()
-
-joinT = join[join["predicted"] == True]
-joinT.sort("prediction", inplace = True, ascending = False)
-
-#check = joinT[joinT["Sum"] > 0]
-
-joinT.index = range(1,len(joinT) + 1)
-print joinT["ChurnToEnd"].value_counts()
-joinT = joinT[joinT["prediction"] >= 0.981]
-print joinT["ChurnToEnd"].value_counts()
-#-----------------
-data_costT = join[join["CustomerId"].isin(joinT["CustomerId"])]
-data_costT["predicted_cost"] = True
-data_costF = join[join["CustomerId"].isin(joinT["CustomerId"]) == False]
-data_costF["predicted_cost"] = False
-
-result = pd.concat([data_costT, data_costF], ignore_index = True)
-
-result.to_csv("/home/tunn/data/tv/data_model/v3/result126.csv", index = False)
-#join.to_csv("/home/tunn/data/tv/data_model/v3/result1.f2.csv", index = False)
-#joinT.to_csv("/home/tunn/data/tv/data_model/v3/result1.f2.T.csv", index = False)
-
-# %% CHECK RESULT DATA 2
-status = fl.loadUserActive("/home/tunn/data/tv/data_support/total_t6.csv").ix[:,:5]
-data = pd.read_csv("/home/tunn/data/tv/data_model/v3/test5.f5.csv")
-data["CustomerId"] = data["CustomerId"].astype(str)
-result = pd.read_csv("/home/tunn/data/tv/data_model/v3/dis_output124.csv")
-result["predicted"] = result["predicted"].str.split(":").str.get(1) == "True"
-result["distribution"] = result["distribution"].str.replace("*", "").astype(float)
-#print result["error"].value_counts()
-
-join = pd.merge(data, result[["predicted", "distribution"]], left_index = True, right_index = True).merge(
-    status, on = "CustomerId", how = "inner")
-FEATURES_LOGID_COUNT = ["LOGID_TIMESHIFT", "LOGID_PAY", "LOGID_SERVICE", "LOGID_UTIL_IPTV", 
-                        "LOGID_UTIL_VOD", "LOGID_UTIL_SPORT"]
-join.drop(FEATURES_LOGID_COUNT, axis=1, inplace=True)
-
-join.sort("distribution", inplace = True, ascending = False)
-join.index = range(1,len(join) + 1)
-
-result.to_csv("/home/tunn/data/tv/data_model/v3/result126.csv", index = False)
 
 #%% CHUAN BI DATA ISC
 total = pd.read_csv("/home/tunn/data/tv/data_support/totalUser_3009.csv")
@@ -433,39 +209,6 @@ print tt["Service"].value_counts()
 zz = tt[tt["Contract"] == "AGD000057"]
                    
 #%% CHUAN BI TABLE CONTRACT
-def loadPay():
-    pay = pd.read_csv("/home/tunn/data/tv/data_raw/PAYMENT/payment7.csv", 
-                      names = ["Contract", "MAC", "Age", "PaymentMethod"], sep = "\t")
-    pay["Contract"] = pay["Contract"].str.upper()   
-    pay["PaymentMethod"] = pay["PaymentMethod"].str[1:]
-    return pay[["Contract", "PaymentMethod"]]
-def loadIsc():    
-    first = pd.DataFrame()
-    for i in ["bt1", "bt2", "bt3", "NVLDTT", "CTBDV", "huy"]:
-        tmp = pd.read_csv("/home/tunn/data/tv/data_support/contract/" + i + ".csv", index_col = 0, sep = "\t")
-        first = pd.concat([first, tmp], ignore_index = True)
-    first.drop("Unnamed: 9", axis = 1, inplace = True)    
-    first = first[first["Contract"].isnull() == False]
-    first["StatusID"] = first["StatusID"].astype(int)
-    first["Contract"] = first["Contract"].str.upper()
-    first["Date"] = pd.to_datetime(first["Date"], format = "%d/%m/%Y %H:%M:%S.%f")
-    first["StopDate"] = pd.to_datetime(first["StopDate"], format = "%d/%m/%Y %H:%M:%S.%f")
-    return first[["Contract", "StatusID", "Date", "StopDate", "Reason"]]
-def loadTotalPayTV():
-    total = pd.read_csv("/home/tunn/data/tv/data_support/totalUser_3110.csv")
-    total["CustomerId"] = total["CustomerId"].astype(str)
-#    total["Date"] = pd.to_datetime(total["Date"], format = "%Y-%m-%d %H:%M:%S")
-#    total["StopDate"] = pd.to_datetime(total["StopDate"], format = "%Y-%m-%d %H:%M:%S")
-#    total = total[total["StatusID"] == 1]
-    return total
-def loadPop():
-    pop = pd.concat([pd.read_csv("/home/tunn/data/tv/data_support/addon_pop.csv"), 
-                 pd.read_csv("/home/tunn/data/tv/data_raw/POP/pop_tapdiem_total.csv")], ignore_index = False)
-    pop["PointSet"] = pop["PointSet"].str.upper()
-    pop["Pop"] = pop["Pop"].str.upper()
-    pop.drop_duplicates("Contract", inplace = True)
-    return pop        
-
 pay = loadPay()
 first = loadIsc()
 box_count = loadTotalPayTV().groupby("Contract")["CustomerId"].count().reset_index()
@@ -553,13 +296,14 @@ plt.savefig("/home/tunn/data/tv/late_pay_chart.png", dpi = 300)
 
 #%%
 #--------------
+first = loadIsc()
 churn = first[(first["StopDate"].isnull() == False) & (first["StatusID"] == 6)]
 churn = churn[churn["StopDate"] > datetime.strptime("2016-02-01", "%Y-%m-%d")]
 active = first[first["StatusID"] != 6]
 total = pd.concat([churn, active], ignore_index = True)
 #--------------
 out = pd.DataFrame()
-for i in range(2, 10):
+for i in range(3, 9):
     m = str(i)
     if(i < 10):
         m = "0" + str(i)
@@ -574,6 +318,11 @@ for i in range(2, 10):
     df = pd.merge(df, location[["FirstCode", "Description", "SubParentDesc"]], on = "FirstCode", how = "left")    
     df = df[["Month", "Contract", "StatusID", "Description", "SubParentDesc"]]   
     df = pd.merge(df, pay, on = "Contract", how = "left")
+    km = pd.read_csv("/home/tunn/data/tv/data_support/khuyen_mai/km_t" + str(i) + ".csv")
+    km = km.groupby("Contract")["soluong_km"].sum().reset_index()        
+    df = pd.merge(df, km[["Contract", "soluong_km"]], on = "Contract", how = "left")
+    tk = pd.read_csv("/home/tunn/data/tv/data_support/tai_khoan/TK_T" + str(i) + ".csv")
+    df = pd.merge(df, tk, on = "Contract", how = "left")
     out = pd.concat([out, df], ignore_index = True)
         
 out["ID"] = out["Month"].dt.year.astype(str) + "-" + out["Month"].dt.month.map("{:02}".format).astype(str) + "-" + out["Contract"]
@@ -587,4 +336,62 @@ churn_count.to_csv("/home/tunn/data/tv/pg_bi_churn_count.csv", index = False, da
            sep = "\t")           
 
 #%%
-df = pd.read_csv("/home/tunn/data/tv/data_model/v3/train1.f5.csv")    
+#df = pd.read_csv("/home/tunn/data/tv/data_model/v3/train1.f5.csv")
+def loadLogId(i):
+    logId = fl.loadUserVector("/home/tunn/data/tv/data_feature/feature_t" + str(i) + "/logIdCount.csv")
+    logId = logId[["CustomerId", "11", "14", "15", "110", "143", "46", "48", "411", "412", "413", "57", "510", "68", "166", "81", "90"]]
+    logId = logId.rename(columns = {"11" : "id_loi_khoi_dong", 
+                                    "14" : "id_reboot_box",
+                                    "15" : "id_special_button",
+                                    "110" : "id_play_kara",
+                                    "46" : "id_lich_phat_song",
+                                    "411" : "id_k+_key_success",
+                                    "510" : "id_search_movie",
+                                    "57" : "id_show_movie_category",
+                                    "68" : "id_sport_predict",
+                                    "166" : "id_bhd_fims_key_success",
+                                    "90" : "id_enter_parental",
+                                    "48" : "id_add_favorite_chanel",
+                                    "412" : "id_set_timer",
+                                    "413" : "id_epg_screen",
+                                    "143" : "id_bhd_fims_rating",
+                                    "81" : "id_enter_app"})
+    return logId
+  
+col_hour = ['CustomerId','h0','h1','h2','h3','h4','h5','h6','h7','h8','h9','h10','h11','h12','h13','h14','h15','h16','h17','h18','h19','h20','h21','h22','h23']
+col_days = ['CustomerId','d0','d1','d2','d3','d4','d5','d6','d7','d8','d9','d10','d11','d12','d13','d14','d15','d16','d17','d18','d19','d20','d21','d22','d23','d24','d25','d26','d27']
+out = pd.DataFrame()
+for i in range(3,10):
+    num = fl.loadUserChurn("/home/tunn/data/tv/data_support/total_t"+str(i)+".csv")
+    num["FirstCode"] = num["Contract"].str[:2]
+    num = pd.merge(num, location[["FirstCode", "Description", "SubParentDesc"]], on = "FirstCode", how = "left")    
+    num = num[["Contract", "CustomerId", "StatusID", "LifeToEnd", "Description", "SubParentDesc"]]
+    hourly = pd.read_csv("/home/tunn/data/tv/data_feature/feature_t"+str(i)+"/vectorHourly.csv", names = col_hour, skiprows = 1)
+    hourly["CustomerId"] = hourly["CustomerId"].astype(str)
+    app = fl.loadUserVector("/home/tunn/data/tv/data_feature/feature_t"+str(i)+"/vectorApp.csv")
+    daily = fl.loadUserVector("/home/tunn/data/tv/data_feature/feature_t"+str(i)+"/vectorDaily.csv")
+    days = pd.read_csv("/home/tunn/data/tv/data_feature/feature_t"+str(i)+"/vectorDays.csv", names = col_days, skiprows = 1)
+    days["CustomerId"] = days["CustomerId"].astype(str)
+    logId = loadLogId(i)
+    reuse = fl.loadUserVector("/home/tunn/data/tv/data_feature/feature_t"+str(i)+"/reuseInfo.csv")
+    reuse = reuse[utils.FEATURES_RETURN_USE_SELECTED]
+    km = fl.loadUserVector("/home/tunn/data/tv/data_support/khuyen_mai/km_t" + str(i) + ".csv")
+    km = km[["CustomerId", "soluong_km"]]
+    num = pd.merge(num, hourly, on = "CustomerId", how = "left")
+    num = pd.merge(num, app, on = "CustomerId", how = "left")
+    num = pd.merge(num, daily, on = "CustomerId", how = "left")
+    num = pd.merge(num, days, on = "CustomerId", how = "left")
+    num = pd.merge(num, logId, on = "CustomerId", how = "left")
+    num = pd.merge(num, reuse, on = "CustomerId", how = "left")
+    num = pd.merge(num, km, on = "CustomerId", how = "left")
+    num["Month"] = datetime.strptime("2016-0" + str(i) + "-01", "%Y-%m-%d")
+    out = pd.concat([out,num], ignore_index = True)
+
+out.to_csv("/home/tunn/data/tv/pg_bi_temp_box.csv", index = False, date_format = "%Y-%m-%d", 
+           sep = "\t")   
+z = logId.describe()
+
+#%%
+
+df = pd.read_csv("/home/tunn/data/tv/data_raw/STATUS UPDATE/change_t10.csv", sep = "\t")
+df["ChangeDate"] = pd.to_datetime(df["ChangeDate"], format = "%d/%m/%Y %H:%M:%S.%f")
