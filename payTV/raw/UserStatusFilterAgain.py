@@ -80,17 +80,17 @@ ca.to_csv("/home/tunn/data/tv/active_churn/" + z, index = False)
 #%%
 names = ["Contract", "CustomerId", "StatusID", "Date", "StopDate"]
 df = pd.read_csv("/home/tunn/data/tv/pg_info.csv", names = names)
-dtf = "%Y-%m-%d"
-df["Date"] = pd.to_datetime(df["Date"], format = dtf)
-df["StopDate"] = pd.to_datetime(df["StopDate"], format = dtf)
-end = datetime.strptime("2016-11-01", dtf)
+#dtf = "%Y-%m-%d"
+df["Date"] = pd.to_datetime(df["Date"], format = "%Y-%m-%d")
+df["StopDate"] = pd.to_datetime(df["StopDate"], format = "%Y-%m-%d")
+end = datetime.strptime("2016-12-01", "%Y-%m-%d")
 df = df[df["Date"] < end]
 
 df_act = df[df["StatusID"] == 1]
 df_act["LifeToEnd"] = (end - df_act["Date"]).dt.days
 df_act["ChurnToEnd"] = False
 df_churn = df[df["StatusID"] != 1]
-df_churn = df_churn[df_churn["StopDate"].dt.month == 10]
+df_churn = df_churn[df_churn["StopDate"].dt.month == 11]
 df_churn["LifeToEnd"] = (df_churn["StopDate"] - df_churn["Date"]).dt.days
 df_churn["ChurnToEnd"] = True
 
@@ -98,8 +98,8 @@ total = pd.concat([df_act, df_churn], ignore_index = True)
 
 print total["ChurnToEnd"].value_counts()
 
-total.to_csv("/home/tunn/data/tv/data_support/total_t10.csv", index = False, date_format = "%Y-%m-%d %H:%M:%S")
-df.to_csv("/home/tunn/data/tv/data_support/totalUser_3110.csv", index = False, date_format = "%Y-%m-%d %H:%M:%S")
+total.to_csv("/home/tunn/data/tv/data_support/total_t11.csv", index = False, date_format = "%Y-%m-%d %H:%M:%S")
+df.to_csv("/home/tunn/data/tv/data_support/totalUser_3011.csv", index = False, date_format = "%Y-%m-%d %H:%M:%S")
 
 #churn10 = pd.read_csv("/home/tunn/data/tv/data_support/churn_t10.csv")
 #check = churn10[churn10["CustomerId"].isin(df_churn["CustomerId"]) == False]
